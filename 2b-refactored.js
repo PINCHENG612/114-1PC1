@@ -1,39 +1,43 @@
-// 2b-refactored.js
-import http from 'http';
-import { renderTemplate } from './utils/templateRenderer.js';
-import { handleStaticFile } from './utils/staticFileHandler.js';
+const http = require('http');
+
+// 引入我們的工具箱 (路徑要有 ./utils/)
+const templateRenderer = require('./utils/templateRenderer');
+const staticFileHandler = require('./utils/staticFileHandler');
 
 // 建立伺服器
 const server = http.createServer((req, res) => {
-    // 路由邏輯：使用 switch 分派
+    // req.url 是使用者輸入的網址路徑
+    console.log('收到請求路徑:', req.url);
+
+    // 使用 switch 來決定路徑怎麼走
     switch (req.url) {
+        // --- 狀況 1: 首頁 ---
         case '/':
-            // 首頁路由：渲染 index.ejs 並傳遞資料
-            renderTemplate(res, '/index.ejs', { 
-                title: '首頁', 
-                msg: '您好 User' 
+            templateRenderer.renderTemplate(res, '/index.ejs', {
+                title: '我的首頁'
             });
             break;
 
+        // --- 狀況 2: 計算機頁面 ---
         case '/calculator':
-            // 計算機路由：渲染 index2.ejs
-            renderTemplate(res, '/index2.ejs', { 
-                title: '簡易計算機' 
+            templateRenderer.renderTemplate(res, '/index2.ejs', {
+                title: '超級計算機'
             });
             break;
 
+        // --- 狀況 3: 其他所有路徑 ---
+        // 如果不是上面定義的頁面，我們就假設它是要拿檔案 (CSS/圖片)
+        // 或者如果檔案真的不存在，handleStaticFile 裡面會幫我們轉去 404
         default:
-            // 其他路徑：全部嘗試作為靜態資源處理 (CSS, JS, 404)
-            handleStaticFile(res, req.url);
+            staticFileHandler.handleStaticFile(res, req.url);
             break;
     }
 });
 
-// 啟動監聽
+// 啟動伺服器
 server.listen(3000, () => {
-    console.log('伺服器已啟動！請訪問 http://localhost:3000');
-    console.log('可用路由：');
-    console.log('  - http://localhost:3000');
-    console.log('  - http://localhost:3000/calculator');
-    console.log('  - 其他路徑將顯示 404 錯誤頁面');
+    console.log('---------------------------------------');
+    console.log('伺服器啟動成功！');
+    console.log('請打開瀏覽器：http://localhost:3000');
+    console.log('---------------------------------------');
 });
